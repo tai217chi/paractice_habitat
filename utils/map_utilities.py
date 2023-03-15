@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 def generate_search_points(sim: habitat_sim.Simulator) -> np.ndarray:
         
     bounds = sim.pathfinder.get_bounds() 
-    grid_size = 2.0 #! 2 [m] ごとに探索候補点を作成
+    grid_size = 2.0 
     grid_x = np.arange(bounds[0][0], bounds[1][0], grid_size)
     grid_y = np.arange(bounds[0][2], bounds[1][2], grid_size)
     xx, yy = np.meshgrid(grid_x, grid_y)
@@ -52,7 +52,7 @@ def _save_robot_trajectory(top_down_map, key_points=None, num_search = 0) -> Non
 #===============================================================================
 def draw_all_points_on_map(sim: habitat_sim.Simulator, search_points: np.ndarray, meters_per_pixel: float=0.02) -> None:
     
-    save_dir = Path(__file__).parent.resolve() / "map"
+    save_dir = Path(__file__).parent.parent.resolve() / "map"
     
     height = sim.pathfinder.get_bounds()[0][1] # 地図の高さを取得
     
