@@ -34,7 +34,6 @@ class NavigateGoalPoint :
             except habitat_sim.errors.GreedyFollowerError:
                 action_list = [None]
                 
-            print(action_list)
             while True: 
                 next_action = action_list[0]
                 action_list = action_list[1:]
