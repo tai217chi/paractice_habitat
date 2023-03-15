@@ -6,7 +6,7 @@ from habitat_sim.utils import viz_utils as vut
 #====================================================================================================
 # encoding video from rgb image observations
 #====================================================================================================
-def encode_video_from_rgb_image(rgb_obserbations: list, search_num: int) -> None:
+def encode_video_from_rgb_image(rgb_obserbations: list, search_num: int, scene_id: str="") -> None:
     """_description_
     カラー画像のリストを受け取り、mp4ファイルに変換する。
 
@@ -14,8 +14,11 @@ def encode_video_from_rgb_image(rgb_obserbations: list, search_num: int) -> None
         rgb_obserbations (list): _description_
         search_num (int): _description_
     """
-    
-    dir_name = Path(__file__).parent.parent.resolve() / "observations" / "rgb"
+    if len(scene_id) == 0:
+        dir_name = Path(__file__).parent.parent.resolve() / "observations" / "rgb"
+        
+    else: 
+        dir_name = Path(__file__).parent.parent.resolve() / "observations" / scene_id / "rgb"
     
     if not dir_name.exists():
         dir_name.mkdir()
@@ -25,7 +28,7 @@ def encode_video_from_rgb_image(rgb_obserbations: list, search_num: int) -> None
 #====================================================================================================
 # encoding video from semantic mask observations
 #====================================================================================================
-def encode_video_from_semantic_image(semantic_observations: list, search_num: int) -> None:
+def encode_video_from_semantic_image(semantic_observations: list, search_num: int, scene_id: str="") -> None:
     """_description_
     セマンティックセグメンテーションの画像のリストを受け取り、mp4ファイルに変換する。
 
@@ -34,7 +37,12 @@ def encode_video_from_semantic_image(semantic_observations: list, search_num: in
         search_num (int): _description_
     """
     
-    dir_name = Path(__file__).parent.parent.resolve() / "observations" / "semantic"
+    if len(scene_id) == 0:
+        dir_name = Path(__file__).parent.parent.resolve() / "observations" / "semantic"
+        
+    else: 
+        dir_name = Path(__file__).parent.parent.resolve() / "observations" / scene_id / "semantic"
+    
     
     if not dir_name.exists():
         dir_name.mkdir() 
@@ -44,7 +52,7 @@ def encode_video_from_semantic_image(semantic_observations: list, search_num: in
 #====================================================================================================
 # encoding video from depth image observations
 #====================================================================================================
-def encode_video_from_depth_image(depth_observations: list, search_num: int):
+def encode_video_from_depth_image(depth_observations: list, search_num: int, scene_id: str="") -> None:
     """_description_
     深度画像のリストを受け取り、mp4ファイルに変換する。
 
@@ -53,7 +61,11 @@ def encode_video_from_depth_image(depth_observations: list, search_num: int):
         search_num (int): _description_
     """
     
-    dir_name = Path(__file__).parent.parent.resolve() / "observations" / "depth" 
+    if len(scene_id) == 0:
+        dir_name = Path(__file__).parent.parent.resolve() / "observations" / "depth"
+        
+    else: 
+        dir_name = Path(__file__).parent.parent.resolve() / "observations" / scene_id / "depth"
     
     if not dir_name.exists():
         dir_name.mkdir() 

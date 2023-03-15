@@ -50,9 +50,15 @@ def _save_robot_trajectory(top_down_map, key_points=None, num_search = 0) -> Non
 #===============================================================================
 # すべての探索候補点を2次元の地図上に描画する関数
 #===============================================================================
-def draw_all_points_on_map(sim: habitat_sim.Simulator, search_points: np.ndarray, meters_per_pixel: float=0.02) -> None:
+def draw_all_points_on_map(sim: habitat_sim.Simulator, search_points: np.ndarray, meters_per_pixel: float=0.05, dataset_id: str="") -> None:
     
-    save_dir = Path(__file__).parent.parent.resolve() / "map"
+    if len(dataset_id) == 0 :
+        save_dir = Path(__file__).parent.parent.resolve() / "map"
+    else :
+        save_dir = Path(__file__).parent.parent.resolve() / "map" / dataset_id
+        
+    if not save_dir.exists():
+        save_dir.mkdir()
     
     height = sim.pathfinder.get_bounds()[0][1] # 地図の高さを取得
     
@@ -75,6 +81,10 @@ def draw_all_points_on_map(sim: habitat_sim.Simulator, search_points: np.ndarray
             plt.scatter(point_map_index[0], point_map_index[1], marker="o", s=30, c="black", alpha=0.8)
             
     plt.savefig(str(save_dir / "all_points"))
+    
+    ## メモリを開放 ##
+    plt.clf()
+    plt.close()
     
 #===============================================================================
 # 世界座標系の探索候補点を地図のインデックスに変換する関数
