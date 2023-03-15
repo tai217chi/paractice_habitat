@@ -10,8 +10,8 @@ class MatterportConfig:
     
     ## specify dataset ##
     _dataset_path = Path(__file__).parents[1] / "data"
-    scene = _dataset_path / "scene_datasets" / "mp3d_example" / "17DRP5sb8fy" / "17DRP5sb8fy.glb"
-    mp3d_scene_dataset = _dataset_path / "scene_datasets" / "mp3d_example" / "mp3d.scene_dataset_config.json"
+    scene = _dataset_path / "scene_datasets" / "mp3d" / "29hnd4uzFmX" / "29hnd4uzFmX.glb"
+    mp3d_scene_dataset = _dataset_path / "scene_datasets" / "mp3d" / "mp3d.scene_dataset_config.json"
     
     ## configuration for observation kind ##
     rgb_sensor = True
@@ -25,3 +25,7 @@ class MatterportConfig:
     ## other configuration ##
     seed = 1
     enable_physics = False
+    
+class GibbsonConfig:
+    
+    pass
