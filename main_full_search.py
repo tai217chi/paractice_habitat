@@ -9,7 +9,7 @@ sys.path.append(str(parent_dir))
 
 from config.simulator_configure import MatterportConfig
 from utils.simulator_configuration import make_sim_config
-from utils.map_utilities import generate_search_points
+from utils.map_utilities import generate_search_points, draw_all_points_on_map
 from utils.visualizations import encode_video_from_rgb_image
 from scripts.navigation_to_goal_point import NavigateGoalPoint
 
@@ -26,6 +26,8 @@ def main():
     agent = sim.initialize_agent(0)
     agent_state = habitat_sim.AgentState()
     agent.set_state(agent_state)
+    
+    draw_all_points_on_map(sim, points)
     
     ## full search ##
     
