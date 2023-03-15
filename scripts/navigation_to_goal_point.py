@@ -16,7 +16,7 @@ class NavigateGoalPoint :
         path_finder = ShortestPath()
         
         ## 経路追従を行うクラスをインスタンス化 ##
-        follower = GreedyGeodesicFollower(pathfinder=sim.pathfinder, agent=sim.get_agent(0), goal_radius=0.1, forward_key="move_forward", left_key="turn_left", right_key="turn_right")
+        follower = GreedyGeodesicFollower(pathfinder=sim.pathfinder, agent=sim.get_agent(0), goal_radius=0.75, forward_key="move_forward", left_key="turn_left", right_key="turn_right")
         observations = [] 
         follower.reset() 
         
@@ -34,11 +34,12 @@ class NavigateGoalPoint :
             except habitat_sim.errors.GreedyFollowerError:
                 action_list = [None]
                 
+            print(action_list)
             while True: 
                 next_action = action_list[0]
                 action_list = action_list[1:]
                 
-                if next_action is None:
+                if next_action is None or len(action_list) == 0:
                     break 
                 
                 sim.step(next_action)
