@@ -75,7 +75,7 @@ def encode_video_from_depth_image(depth_observations: list, search_num: int, sce
 #====================================================================================================
 # encoding video from all types image observations
 #====================================================================================================
-def encode_video_from_all_kind_image(observations: list, search_num: int):
+def encode_video_from_all_kind_image(observations: list, search_num: int, scene_id: str="", visualize_rgb: bool=True, visualize_semantic: bool=True, visualize_depth: bool=True):
     
     """_description_
     全種類の画像のリストを受け取り、mp4ファイルに変換する。
@@ -85,8 +85,14 @@ def encode_video_from_all_kind_image(observations: list, search_num: int):
         search_num (int): _description_
     """
     
-    output_dir = Path(__file__).parent.resolve() / "observations"
+    output_dir = Path(__file__).parent.parent.resolve() / "observations"
     
+    if len(scene_id) != 0:
+        output_dir = Path(__file__).parent.parent.resolve() / "observations" / scene_id
+        
+    if not output_dir.exists():
+        output_dir.mkdir()
+        
     rgb_dir = output_dir / "rgb"
     semantic_dir = output_dir / "semantic"
     depth_dir = output_dir / "depth"
@@ -100,30 +106,33 @@ def encode_video_from_all_kind_image(observations: list, search_num: int):
     if not semantic_dir.exists():
         semantic_dir.mkdir()
     
-    vut.make_video(
+    if visualize_rgb:
+        vut.make_video(
                 observations=observations,
                 primary_obs="color_sensor",
                 primary_obs_type="color",
-                video_file=str(rgb_dir / f"/continuous_nav_{search_num}"),
-                fps=30,
+                video_file=str(rgb_dir / f"continuous_nav_{search_num}"),
+                fps=10,
                 open_vid=False,
             )
     
-    vut.make_video(
-        observations=observations,
-        primary_obs="semantic_sensor",
-        primary_obs_type="semantic",
-        video_file=str(semantic_dir / f"/continuous_nav_{search_num}"),
-        fps=30,
-        open_vid=False,
-    )
+    if visualize_semantic:
+        vut.make_video(
+            observations=observations,
+            primary_obs="semantic_sensor",
+            primary_obs_type="semantic",
+            video_file=str(semantic_dir / f"continuous_nav_{search_num}"),
+            fps=10,
+            open_vid=False,
+        )
         
-    vut.make_video(observations=observations, 
-                    primary_obs="depth_sensor", 
-                    primary_obs_type="depth", 
-                    video_file=str(depth_dir / f"/continuouts_nav_{search_num}"), 
-                    fps=30, 
-                    open_vid=False
-    )
+    if visualize_depth:
+        vut.make_video(observations=observations, 
+                        primary_obs="depth_sensor", 
+                        primary_obs_type="depth", 
+                        video_file=str(depth_dir / f"continuouts_nav_{search_num}"), 
+                        fps=10, 
+                        open_vid=False
+        )
     
     

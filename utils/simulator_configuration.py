@@ -87,3 +87,24 @@ def make_sim_config(matterport_config: MatterportConfig) -> habitat_sim.Configur
     agent_cfg.height = 1.0 
     
     return habitat_sim.Configuration(sim_cfg, [agent_cfg])
+
+def recompute_navmesh(sim: habitat_sim.Simulator, cell_size: float=0.05, cell_height: float=0.2) -> bool:
+    """
+    ボクセルの解像度を変更するために、NavMeshを再計算する
+
+    Args:
+        sim (habitat_sim.Simulator): _description_
+        cell_size (float, optional): _description_. Defaults to 0.05.
+        cell_height (float, optional): _description_. Defaults to 0.2.
+
+    Returns:
+        bool: _description_
+    """    
+    navmesh_settings = habitat_sim.NavMeshSettings()
+    navmesh_settings.cell_size = cell_size
+    navmesh_settings.cell_height = cell_height
+    
+    recompute_success = sim.recompute_navmesh(sim.pathfinder, navmesh_settings, include_static_objects=True)
+    
+    return recompute_success 
+    
