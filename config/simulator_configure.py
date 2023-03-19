@@ -26,6 +26,6 @@ class MatterportConfig:
     seed = 1
     enable_physics = False
     
-class GibbsonConfig:
+class HM3DConfig:
     
     pass
