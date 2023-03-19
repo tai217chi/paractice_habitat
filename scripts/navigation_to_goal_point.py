@@ -1,3 +1,4 @@
+import time
 
 import cv2
 import numpy as np
@@ -49,7 +50,7 @@ class NavigateGoalPoint :
         return observations
     
     @classmethod 
-    def navigation_with_object_obs(cls, sim: habitat_sim.Simulator, search_point: np.ndarray) -> None :
+    def navigation_with_object_obs(cls, sim: habitat_sim.Simulator, search_point: np.ndarray, obj_save_dir: str) -> None :
         
         """
         環境内を移動し物体の観測情報を集めるための関数
@@ -79,6 +80,7 @@ class NavigateGoalPoint :
             except habitat_sim.errors.GreedyFollowerError:
                 action_list = [None]
                 
+            current_ation = 0
             while True: 
                 next_action = action_list[0]
                 action_list = action_list[1:]
@@ -89,15 +91,16 @@ class NavigateGoalPoint :
                 sim.step(next_action)
                 
                 observation = sim.get_sensor_observations()
-                bbox_image = cls._object_obs(observation["color_sensor"], observation["semantic_sensor"])
+                bbox_image = cls._object_obs(observation["color_sensor"], observation["semantic_sensor"], obj_save_dir + f"{current_ation}_")
                 
                 observations.append(bbox_image)
+                current_ation += 1
                 
         return observations
                 
 
     @classmethod
-    def _object_obs(cls, rgb_view: np.ndarray, semantic_view: np.ndarray) -> np.ndarray :
+    def _object_obs(cls, rgb_view: np.ndarray, semantic_view: np.ndarray, save_dir: str) -> np.ndarray :
         
         """
         instance maskに従いカラー画像から物体の画像を取得するための関数
@@ -109,6 +112,28 @@ class NavigateGoalPoint :
         ## デバッグ用。BBoxをrgb画像に可視化 ##
         bbox_image = cls._bbox_plot(rgb_view, bboxes)
         
+        for index, bbox in enumerate(bboxes) :
+            
+            ## 切り出す領域が画像サイズよりも大きい場合、黒色で補間する ##
+            if bbox[2] > rgb_view.shape[1]  or bbox[3] > rgb_view.shape[0] :
+                if bbox[2] > rgb_view.shape[1] :
+                    rgb_view_copy = cv2.copyMakeBorder(rgb_view, 0, 0, 0, bbox[2] - rgb_view.shape[1], cv2.BORDER_CONSTANT, value=(0, 0, 0))
+
+                if bbox[3] > rgb_view.shape[0] :
+                    rgb_view_copy = cv2.copyMakeBorder(rgb_view, 0, bbox[3] - rgb_view.shape[0], 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+                
+                ## RoIを切り出す ##
+                crop_image = cv2.cvtColor(rgb_view_copy[bbox[1]:bbox[3], bbox[0]:bbox[2]], cv2.COLOR_BGR2RGB)
+            
+                ## 切り出した領域を保存する ##
+                cv2.imwrite(save_dir + f"{index}.png", crop_image)
+                
+            else:
+                if len(rgb_view.copy()[bbox[1]:bbox[3], bbox[0]:bbox[2]]) != 0:
+                    crop_image = cv2.cvtColor(rgb_view.copy()[bbox[1]:bbox[3], bbox[0]:bbox[2]], cv2.COLOR_BGR2RGB)
+                    cv2.imwrite(save_dir + f"{index}.png", crop_image)
+            
+            
         return bbox_image
         
 
@@ -121,7 +146,6 @@ class NavigateGoalPoint :
         """
         
         object_index = np.unique(instance_mask)
-        print(f"object instances: {object_index}")
         
         bboxes  = []
         for i in object_index :
