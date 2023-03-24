@@ -1,0 +1,12 @@
+# dataset folders
+data/
+map/
+observations/
+
+# debug source code
+practice_navmesh.py
+test_shortest_follower.py
+test_visualize_search_points.py
+test_full_search_all_dataset.py
+test_object_detection.py
+
