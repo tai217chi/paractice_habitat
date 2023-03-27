@@ -32,7 +32,7 @@ def main():
     agent_state = habitat_sim.AgentState()
     agent.set_state(agent_state)
     
-    draw_all_points_on_map(sim, points)
+    draw_all_points_on_map(sim, points, dataset_id=dataset_id)
     
     ## full search ##
     
