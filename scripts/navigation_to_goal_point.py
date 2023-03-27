@@ -1,21 +1,28 @@
 import time
 import glob
+import queue
 from pathlib import Path
 
 import cv2
 import numpy as np
+from PIL import Image
 
 import habitat_sim
 from habitat_sim.nav import GreedyGeodesicFollower, ShortestPath
+from habitat_sim.utils.common import d3_40_colors_rgb
 
 class NavigateGoalPoint :
     
-    def __init__(self, instanceID_to_semanticID: dict, semanticID_to_name: dict) -> None:
+    def __init__(self, instanceID_to_semanticID: dict, semanticID_to_name: dict) -> habitat_sim.Simulator:
         self._instanceID_to_semanticID = instanceID_to_semanticID
         self._semanticID_to_name = semanticID_to_name
     
-    @staticmethod
-    def navigation(sim:habitat_sim.Simulator, search_point: np.ndarray) -> list:
+    @classmethod
+    def navigation(cls, sim:habitat_sim.Simulator, 
+                   search_point: np.ndarray, 
+                   is_save_obs: bool, 
+                   current_point: int, 
+                   dataset_id: str) -> None:
         
         ## 経路計画に使用するクラスをインスタンス化 ##
         path_finder = ShortestPath()
@@ -33,12 +40,28 @@ class NavigateGoalPoint :
         path_finder.requested_end = search_point
         found_path = sim.pathfinder.find_path(path_finder)
         
+        ## 保存用のフォルダを作成 ##
+        rgb_dir = Path(__file__).parent.parent.resolve() / f"./observations/{dataset_id}/rgb"
+        depth_dir = Path(__file__).parent.parent.resolve() / f"./observations/{dataset_id}/depth"
+        semantic_dir = Path(__file__).parent.parent.resolve() / f"./observations/{dataset_id}/semantic"
+        
+        if not rgb_dir.exists() :
+            rgb_dir.mkdir(parents=True)
+            
+        if not depth_dir.exists() :
+            depth_dir.mkdir(parents=True)
+            
+        if not semantic_dir.exists() :
+            semantic_dir.mkdir(parents=True)
+        
+        ## ナビゲーション開始 ##
         if found_path:
             try:
                 action_list = follower.find_path(search_point)
             except habitat_sim.errors.GreedyFollowerError:
                 action_list = [None]
                 
+            num_observation = 0
             while True: 
                 next_action = action_list[0]
                 action_list = action_list[1:]
@@ -48,11 +71,23 @@ class NavigateGoalPoint :
                 
                 sim.step(next_action)
                 
-                observations.append(sim.get_sensor_observations())
+                observation = sim.get_sensor_observations()
+                
+                if is_save_obs :
+                    rgb = cv2.cvtColor(observation["color_sensor"], cv2.COLOR_BGR2RGB)
+                    depth = observation["depth_sensor"]
+                    semantic = observation["semantic_sensor"]  
+                    semantic_rgb = cls._semantic_to_rgb(semantic)
                     
-        return observations
+                    cv2.imwrite(str(rgb_dir / f"{current_point}_{num_observation}.png"), rgb)
+                    cv2.imwrite(str(depth_dir / f"{current_point}_{num_observation}.png"), depth)
+                    cv2.imwrite(str(semantic_dir / f"{current_point}_{num_observation}.png"), semantic_rgb)
+                    
+                    num_observation += 1
+        
+        return sim
     
-    def navigation_with_object_obs(self, sim: habitat_sim.Simulator, search_point: np.ndarray, obj_save_dir: Path) -> None :
+    def navigation_with_object_obs(self, sim: habitat_sim.Simulator, search_point: np.ndarray, obj_save_dir: Path) -> habitat_sim.Simulator :
         
         """
         環境内を移動し物体の観測情報を集めるための関数
@@ -98,7 +133,7 @@ class NavigateGoalPoint :
                 # observations.append(bbox_image)
                 current_ation += 1
                 
-        return observations
+        return sim
                 
 
     def _object_obs(self, rgb_view: np.ndarray, semantic_view: np.ndarray, save_dir: Path) -> np.ndarray :
@@ -184,6 +219,9 @@ class NavigateGoalPoint :
             
         return np.array(bboxes)
                 
+    #===============================================================================
+    # Static Methods
+    #===============================================================================
 
     @staticmethod
     def _bbox_plot(rgb_view: np.ndarray, bboxes: np.ndarray) -> np.ndarray :
@@ -213,3 +251,44 @@ class NavigateGoalPoint :
                 return False
             
             return True
+        
+    @staticmethod
+    def _semantic_to_rgb(semantic_image: np.ndarray) -> np.ndarray :
+        
+        #===============================================================================
+        # セマンティックラベルからRGB画像に変換するための関数
+        #
+        # Args: 
+        #  semantic_image (np.ndarray): セマンティックラベル画像
+        # Reteruns:
+        #  semantic_image_rgb (np.ndarray): セマンティックラベルをRGB画像に変換したもの
+        #===============================================================================
+        
+        semantic_image_rgb = Image.new(
+            "P", (semantic_image.shape[1], semantic_image.shape[0])
+        )
+        semantic_image_rgb.putpalette(d3_40_colors_rgb.flatten())
+        semantic_image_rgb.putdata((semantic_image.flatten() % 40).astype(np.uint8))
+        semantic_image_rgb = semantic_image_rgb.convert("RGBA")
+        return np.array(semantic_image_rgb)
+    
+    @staticmethod
+    def _breadth_first_search(goal_position: list, visited: set):
+        
+        #===============================================================================
+        # 幅優先探索によって
+        #===============================================================================
+
+        next_goal_point_queue = queue.Queue()
+        
+        # 次のゴール地点候補をキューに追加
+        for point in goal_position :
+            next_goal_point_queue.put(point)
+            
+        while not next_goal_point_queue.empty():
+            current_goal = next_goal_point_queue.get()
+            
+            if current_goal in visited:
+                continue 
+            
+            
