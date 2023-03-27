@@ -1,6 +1,10 @@
+
 import time
 import sys
+import queue
 from pathlib import Path
+
+import numpy as np
 
 import habitat_sim
 
@@ -18,6 +22,7 @@ def main():
     ## create simulator ##
     simulator_configuration = make_sim_config(MatterportConfig)
     sim = habitat_sim.Simulator(simulator_configuration)
+    dataset_id = str(MatterportConfig.scene.name).split('.')[0]
     
     ## generate search points ##
     points = generate_search_points(sim)
@@ -33,15 +38,24 @@ def main():
     
     ## 探索候補点のインデックスを定義 ##
     current_point = 0
-    
+    visited = set()
     while current_point < len(points) :
-    
-        observations = NavigateGoalPoint.navigation(sim, points[current_point])
+        # 最も近いゴール地点を決定
+        closest_goal = None
+        min_distance = float("inf")
+        current_agent_position = sim.agents[0].get_state().position
+        for goal in points:
+            dist = np.linalg.norm(goal - current_agent_position)
+            if dist < min_distance and tuple(goal.tolist()) not in visited:
+                closest_goal = goal
+                min_distance = dist
+
+        visited.add(tuple(closest_goal.tolist()))
+        sim = NavigateGoalPoint.navigation(sim, closest_goal, is_save_obs=True, 
+                                     current_point=current_point, dataset_id=dataset_id)
         
         current_point += 1
         time.sleep(2.0)
-        
-        encode_video_from_rgb_image(observations, current_point)
         
 if __name__ == "__main__" :
     main()
