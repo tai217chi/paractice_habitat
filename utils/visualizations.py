@@ -135,4 +135,3 @@ def encode_video_from_all_kind_image(observations: list, search_num: int, scene_
                         open_vid=False
         )
     
-    
