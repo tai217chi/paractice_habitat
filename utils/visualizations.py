@@ -1,3 +1,6 @@
+import imageio
+import glob
+from natsort import natsorted
 from pathlib import Path
 
 from habitat.utils.visualizations.utils import images_to_video
@@ -135,3 +138,12 @@ def encode_video_from_all_kind_image(observations: list, search_num: int, scene_
                         open_vid=False
         )
     
+#===============================================================================
+# フォルダ内の静止画から動画を生成
+#===============================================================================
+def encode_video_from_folder(image_folder: str, fps: int, save_dir: str) :
+    print(natsorted(glob.glob(image_folder + "/*.png")))
+    with imageio.get_writer(save_dir, fps=fps) as video:
+        for image in natsorted(glob.glob(image_folder + "/*.png")):
+            image = imageio.imread(image)
+            video.append_data(image)
