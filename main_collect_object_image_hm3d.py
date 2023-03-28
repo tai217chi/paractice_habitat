@@ -3,6 +3,7 @@
 import time
 import sys
 from pathlib import Path
+from tqdm.contrib import tenumerate
 
 import numpy as np
 
@@ -59,7 +60,8 @@ def main():
     
     current_point = 0
     visited = set()
-    while current_point < len(points) :
+    # while current_point < len(points) :
+    for current_point, _ in tenumerate(points):
         # 最も近いゴール地点を決定
         closest_goal = None
         min_distance = float("inf")
@@ -73,7 +75,7 @@ def main():
         visited.add(tuple(closest_goal.tolist()))
         sim = observer.navigation_with_object_obs(sim, closest_goal, obj_save_dir=obj_save_dir)
         
-        current_point += 1
+        # current_point += 1
         
 if __name__ == "__main__" :
     main()
