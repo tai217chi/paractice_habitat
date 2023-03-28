@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 def generate_search_points(sim: habitat_sim.Simulator) -> np.ndarray:
 
     bounds = sim.pathfinder.get_bounds()
-    grid_size = 1.0
+    grid_size = 0.3
     grid_x = np.arange(bounds[0][0], bounds[1][0], grid_size)
     grid_y = np.arange(bounds[0][2], bounds[1][2], grid_size)
     xx, yy = np.meshgrid(grid_x, grid_y)
