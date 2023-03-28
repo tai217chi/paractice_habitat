@@ -6,8 +6,8 @@ class MatterportConfig:
     
     ## configuraton for observation image resolution ##
     # NOTE：低解像度時の品質劣化が激しい
-    width = 1500
-    height = 1500
+    width = 1080
+    height = 720
     
     ## specify dataset ##
     _dataset_path = Path(__file__).parents[1] / "data"
@@ -32,8 +32,8 @@ class HM3DConfig:
     dataset_kind = "val"
     
     ## configuration for observation images (RGB, instance mask, Depth) ##
-    width = 640
-    height = 480
+    width = 1280
+    height = 960
     
     ## specify dataset ##
     _dataset_path = Path(__file__).parents[1] / "data" 
@@ -47,7 +47,7 @@ class HM3DConfig:
     
     ## configuration for parameters related to embodied agent ##
     default_agent = 0 
-    sensor_height = 0.8
+    sensor_height = 1.0
     
     ## other configuration ##
     seed = 1
@@ -71,7 +71,7 @@ class ReplicaConfig:
     
     ## configuration for parameters related to embodied agent ##
     default_agent = 0 
-    sensor_height = 0.8
+    sensor_height = 1.5
     
     ## other configuration ##
     seed = 1
